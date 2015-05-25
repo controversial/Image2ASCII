@@ -1,4 +1,5 @@
 from Image2ASCII import *
-from render import *
-
-RenderASCII(image2ASCII(Image.open("Test_Images/Calvin.jpg"))).show()
+image = Image.open("Test_Images/Calvin.jpg") #Open the image
+ascii = image2ASCII(image)                   #Convert the image to ASCII
+outputimage = RenderASCII(ascii)             #Render the ASCII
+outputimage.show()                           #Show the final product

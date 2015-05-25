@@ -2,7 +2,7 @@ from bisect import bisect_right
 import random
 import warnings
 
-from PIL import Image
+from PIL import Image, ImageFont, ImageDraw
 
 #Characters grouped into 'visual weight'
 grayscale =  [" ",
@@ -53,3 +53,24 @@ def image2ASCII(im, scale=200, showimage=False):
 
 	#return  the final string
 	return output
+
+
+
+
+
+
+def RenderASCII(text, fontsize=5):
+    '''Create an image of the ASCII text'''
+    first, _, _ = text.partition('\n') #|
+    linelist=text.split('\n')          #|- get the width of the ASCII art, in characters
+    size = len(first)                  #|
+    font = ImageFont.truetype("DejaVuSansMono.ttf", fontsize*4)
+    width, height = font.getsize(first) # get the dimensions of the ASCII art, in pixels
+
+    image = Image.new("RGB", (width, width), (237, 237, 237))#Create a new image
+    draw = ImageDraw.Draw(image)
+
+    for x in range(len(linelist)):                           #|
+        line = linelist[x]                                   #|- #Draw the text onto the image
+        draw.text((0, x*height), line, (0, 0, 0), font=font) #|
+    return image

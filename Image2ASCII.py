@@ -116,26 +116,30 @@ def PythonistaTest():
     '''A test of the module for iOS devices running Pythonista'''
     import console
     import photos
-    import clipboard
     # Ask the user to either take a photo or choose an existing one
     capture = console.alert("Image2ASCII", button1="Take Photo", button2="Pick Photo")
+
     if capture == 1:
         im = photos.capture_image()
     elif capture == 2:
         im = photos.pick_image(original=False)
+
     photos.save_image(im)
+
     console.show_activity()
     out = image2ASCII(im, 200)
     outim = RenderASCII(out, bgcolor='#ededed')
     stitchImages(im, outim).show()
     console.hide_activity()
+
     outim.save('image.jpg')
     console.quicklook('image.jpg')
     mode = console.alert("Image2ASCII", "You can either:", "Share Text", "Share Image")
+
     if mode == 1:
-        file = open('output.txt', 'w')
-        file.write(out)
-        file.close()
+        with open('output.txt', 'w') as file:
+            file.write(out)
+            file.close()
         console.open_in('output.txt')
     elif mode == 2:
         console.open_in('image.jpg')

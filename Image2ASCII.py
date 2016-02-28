@@ -137,9 +137,8 @@ def PythonistaTest():
     mode = console.alert("Image2ASCII", "You can either:", "Share Text", "Share Image")
 
     if mode == 1:
-        with open('output.txt', 'w') as file:
-            file.write(out)
-            file.close()
+        with open('output.txt', 'w') as f:
+            f.write(out)
         console.open_in('output.txt')
     elif mode == 2:
         console.open_in('image.jpg')

@@ -1,23 +1,50 @@
+from bisect import bisect
 import random
 import time
 import warnings
 import string
 
-from PIL import Image, ImageFont, ImageDraw
+from PIL import Image, ImageFont, ImageDraw, ImageStat, ImageEnhance
 
-# Characters grouped into 'visual weight'. Default character map.
-default_charmap = dict(zip(
-    [0, 36, 72, 108, 144, 180, 216, 255],
 
-    [" ",
-     " ",
-     ".,-",
-     "_ivc=!/|\\~",
-     "gjez2]/(YL)t[+T7Vf",
-     "mdK4ZGbNDXY5P*Q",
-     "W8KMA",
-     "$&#%"]
-))
+def _getfont(fontsize):
+    '''Return the ImageFont for the font I'm using'''
+    try:
+        return ImageFont.truetype("DejaVuSansMono", fontsize*4)
+    except IOError:
+        import _font_cache
+        return ImageFont.truetype(_font_cache.get_font_path('DejaVuSansMono'))
+
+
+def visual_weight(char):
+    '''Return the (approximate) visual weight for a character'''
+    font = _getfont(10)
+    # The size of the letter
+    width, height = font.getsize(char)
+    # Render the letter in question onto an image
+    im = Image.new("RGB", (width, height), (255, 255, 255))
+    dr = ImageDraw.Draw(im)
+    dr.text((0, 0), char, (0, 0, 0), font=font)
+    # Mean of image is visual weight
+    stat = ImageStat.Stat(im)
+    lightness = stat.mean[0]
+    # Project the lightness from a scale of 100 to a scale of 255
+    lightness = (255 - lightness) / 100.0 * 255
+    return lightness
+
+
+def gen_charmap(chars=string.printable):
+    '''Generate a character map for all input characters, mapping each character
+    to its visual weight.'''
+    if "\n" in chars:
+        chars = "".join(set(chars)-{"\n"})
+    charmap = {}
+    for c in chars:
+        weight = visual_weight(c)
+        if weight not in charmap:
+            charmap[weight] = ''
+        charmap[weight] += c
+    return charmap
 
 
 def resize(im, base=200):
@@ -40,7 +67,7 @@ def resize(im, base=200):
     return im
 
 
-def image2ASCII(im, scale=200, showimage=False, charmap=default_charmap):
+def image2ASCII(im, scale=200, showimage=False, charmap=gen_charmap()):
     thresholds = charmap.keys()
     grayscale = charmap.values()
 
@@ -55,7 +82,11 @@ def image2ASCII(im, scale=200, showimage=False, charmap=default_charmap):
         warnings.warn("Image cannot be more than 500 characters wide")
         scale = 500
 
+    # Resize the image and convert to grayscale
     im = resize(im, scale).convert("L")
+    # Optimize the image by increasing contrast.
+    enhancer = ImageEnhance.Contrast(im)
+    im = enhancer.enhance(1.5)
 
     # Begin with an empty string that will be added on to
     output = ''
@@ -79,11 +110,7 @@ def image2ASCII(im, scale=200, showimage=False, charmap=default_charmap):
 def RenderASCII(text, fontsize=5, bgcolor='#EDEDED'):
     '''Create an image of ASCII text'''
     linelist = text.split('\n')
-    try:
-        font = ImageFont.truetype("DejaVuSansMono", fontsize*4)
-    except:
-        import _font_cache
-        font = ImageFont.truetype(_font_cache.get_font_path('DejaVuSansMono'))
+    font = _getfont(fontsize)
     width, height = font.getsize(linelist[1])
 
     image = Image.new("RGB", (width, height*len(linelist)), bgcolor)
@@ -159,4 +186,6 @@ if __name__ == "__main__":
         im = Image.open(sys.argv[1])
         out = image2ASCII(im, 200)
         outim = RenderASCII(out, bgcolor='#ededed')
-        stitchImages(im, outim).show()
+        final = stitchImages(im, outim)
+        final.show()
+        final.save("final.png")

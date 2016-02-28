@@ -1,4 +1,3 @@
-from bisect import bisect
 import random
 import time
 import warnings
@@ -7,17 +6,18 @@ import string
 from PIL import Image, ImageFont, ImageDraw
 
 # Characters grouped into 'visual weight'. Default character map.
-grayscale = [" ",
-             " ",
-             ".,-",
-             "_ivc=!/|\\~",
-             "gjez2]/(YL)t[+T7Vf"
-             "mdK4ZGbNDXY5P*Q",
-             "W8KMA",
-             "$&#%"]
+default_charmap = dict(zip(
+    [0, 36, 72, 108, 144, 180, 216, 255],
 
-# Thresholds for when to use which character set
-thresholds = [36, 72, 108, 144, 180, 216]
+    [" ",
+     " ",
+     ".,-",
+     "_ivc=!/|\\~",
+     "gjez2]/(YL)t[+T7Vf",
+     "mdK4ZGbNDXY5P*Q",
+     "W8KMA",
+     "$&#%"]
+))
 
 
 def resize(im, base=200):
@@ -40,7 +40,10 @@ def resize(im, base=200):
     return im
 
 
-def image2ASCII(im, scale=200, showimage=False):
+def image2ASCII(im, scale=200, showimage=False, charmap=default_charmap):
+    thresholds = charmap.keys()
+    grayscale = charmap.values()
+
     if showimage:
         im.show()
     # Make sure an image is selected
@@ -62,7 +65,9 @@ def image2ASCII(im, scale=200, showimage=False):
     for y in range(im.size[1]):
         for x in range(im.size[0]):
             luminosity = 255-im.getpixel((x, y))
-            row = bisect(thresholds, luminosity)
+            # Closest match for luminosity
+            closestLum = min(thresholds, key=lambda x: abs(x-luminosity))
+            row = thresholds.index(closestLum)
             possiblechars = grayscale[row]
             output += possiblechars[random.randint(0, len(possiblechars)-1)]
         output += '\n'

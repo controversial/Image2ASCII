@@ -33,10 +33,10 @@ def visual_weight(char):
 
 
 def gen_charmap(chars=string.printable):
-    '''Generate a character map for all input characters, mapping each character
-    to its visual weight.'''
+    '''Generate a character map for all input characters, mapping each
+    character to its visual weight.'''
     # Use the translate method with only the second `deletechars` param.
-    chars = chars.translate(None, "\n\r\t")
+    chars = chars.replace("\n", "").replace("\r", "").replace("\t", "")
     charmap = {}
     for c in chars:
         weight = visual_weight(c)
@@ -67,8 +67,8 @@ def resize(im, base=200):
 
 
 def image2ASCII(im, scale=200, showimage=False, charmap=gen_charmap()):
-    thresholds = charmap.keys()
-    grayscale = charmap.values()
+    thresholds = list(charmap.keys())
+    grayscale = list(charmap.values())
 
     if showimage:
         im.show()
@@ -125,7 +125,9 @@ def stitchImages(im1, im2):
     '''Takes 2 PIL Images and returns a new image that
     appends the two images side-by-side.'''
 
-    im2 = im2.resize((im2.size[0] / 2, im2.size[1] / 2), Image.ANTIALIAS)
+    im2 = im2.resize(
+        (int(im2.size[0] / 2), int(im2.size[1] / 2)), Image.ANTIALIAS
+    )
     im1 = im1.resize(im2.size, Image.ANTIALIAS)
 
     # store the dimensions of each variable

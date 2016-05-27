@@ -164,8 +164,8 @@ def PythonistaTest():
     stitchImages(im, outim).show()
     console.hide_activity()
 
-    outim.save('image.jpg')
-    console.quicklook('image.jpg')
+    outim.save('image.png')
+    console.quicklook('image.png')
     mode = console.alert("Image2ASCII", "You can either:", "Share Text",
                          "Share Image")
 
@@ -174,7 +174,7 @@ def PythonistaTest():
             f.write(out)
         console.open_in('output.txt')
     elif mode == 2:
-        console.open_in('image.jpg')
+        console.open_in('image.png')
     time.sleep(5)
     console.clear()
 
@@ -184,7 +184,7 @@ if __name__ == "__main__":
     # We're on iOS, and therefore Pythonista
     if sys.platform in ['iphoneos', 'ios']:
         PythonistaTest()
-    else:  # We're on desktop. Use `python Image2ASCII.py my-image.jpg`
+    else:  # We're on desktop. Use `python Image2ASCII.py my-image.png`
         im = Image.open(sys.argv[1])
         out = image2ASCII(im, 200)
         outim = RenderASCII(out, bgcolor='#ededed')

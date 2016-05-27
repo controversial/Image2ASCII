@@ -9,7 +9,7 @@ from PIL import Image, ImageFont, ImageDraw, ImageStat, ImageEnhance
 def _getfont(fontsize):
     '''Return the ImageFont for the font I'm using'''
     try:
-        return ImageFont.truetype("DejaVuSansMono", fontsize*4)
+        return ImageFont.truetype("DejaVuSansMono", fontsize * 4)
     except IOError:
         import _font_cache
         return ImageFont.truetype(_font_cache.get_font_path('DejaVuSansMono'))
@@ -57,12 +57,12 @@ def resize(im, base=200):
         y = im.size[1]
         a = True
 
-    percent = (base/float(x))
-    size = int((float(y)*float(percent)))
+    percent = (base / float(x))
+    size = int((float(y) * float(percent)))
     if a:
-        im = im.resize((base, int(size*0.5)), Image.ANTIALIAS)
+        im = im.resize((base, int(size * 0.5)), Image.ANTIALIAS)
     else:
-        im = im.resize((size, int(base*0.5)), Image.ANTIALIAS)
+        im = im.resize((size, int(base * 0.5)), Image.ANTIALIAS)
     return im
 
 
@@ -94,12 +94,12 @@ def image2ASCII(im, scale=200, showimage=False, charmap=gen_charmap()):
     # of appropriate weight to each pixel
     for y in range(im.size[1]):
         for x in range(im.size[0]):
-            luminosity = 255-im.getpixel((x, y))
+            luminosity = 255 - im.getpixel((x, y))
             # Closest match for luminosity
-            closestLum = min(thresholds, key=lambda x: abs(x-luminosity))
+            closestLum = min(thresholds, key=lambda x: abs(x - luminosity))
             row = thresholds.index(closestLum)
             possiblechars = grayscale[row]
-            output += possiblechars[random.randint(0, len(possiblechars)-1)]
+            output += possiblechars[random.randint(0, len(possiblechars) - 1)]
         output += '\n'
 
     # return  the final string
@@ -112,12 +112,12 @@ def RenderASCII(text, fontsize=5, bgcolor='#EDEDED'):
     font = _getfont(fontsize)
     width, height = font.getsize(linelist[1])
 
-    image = Image.new("RGB", (width, height*len(linelist)), bgcolor)
+    image = Image.new("RGB", (width, height * len(linelist)), bgcolor)
     draw = ImageDraw.Draw(image)
 
     for x in range(len(linelist)):
         line = linelist[x]
-        draw.text((0, x*height), line, (0, 0, 0), font=font)
+        draw.text((0, x * height), line, (0, 0, 0), font=font)
     return image
 
 
@@ -125,7 +125,7 @@ def stitchImages(im1, im2):
     '''Takes 2 PIL Images and returns a new image that
     appends the two images side-by-side.'''
 
-    im2 = im2.resize((im2.size[0]/2, im2.size[1]/2), Image.ANTIALIAS)
+    im2 = im2.resize((im2.size[0] / 2, im2.size[1] / 2), Image.ANTIALIAS)
     im1 = im1.resize(im2.size, Image.ANTIALIAS)
 
     # store the dimensions of each variable
@@ -148,7 +148,8 @@ def PythonistaTest():
     import console
     import photos
     # Ask the user to either take a photo or choose an existing one
-    capture = console.alert("Image2ASCII", button1="Take Photo", button2="Pick Photo")
+    capture = console.alert("Image2ASCII", button1="Take Photo",
+                            button2="Pick Photo")
 
     if capture == 1:
         im = photos.capture_image()
@@ -165,7 +166,8 @@ def PythonistaTest():
 
     outim.save('image.jpg')
     console.quicklook('image.jpg')
-    mode = console.alert("Image2ASCII", "You can either:", "Share Text", "Share Image")
+    mode = console.alert("Image2ASCII", "You can either:", "Share Text",
+                         "Share Image")
 
     if mode == 1:
         with open('output.txt', 'w') as f:
@@ -179,7 +181,8 @@ def PythonistaTest():
 
 if __name__ == "__main__":
     import sys
-    if sys.platform == 'iphoneos':  # We're on iOS, and therefore Pythonista
+    # We're on iOS, and therefore Pythonista
+    if sys.platform in ['iphoneos', 'ios']:
         PythonistaTest()
     else:  # We're on desktop. Use `python Image2ASCII.py my-image.jpg`
         im = Image.open(sys.argv[1])
@@ -188,3 +191,4 @@ if __name__ == "__main__":
         final = stitchImages(im, outim)
         final.show()
         final.save("final.png")
+        outim.save("ascii.png")
